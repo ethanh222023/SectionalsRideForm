@@ -69,24 +69,22 @@
 
     .fog-layer {
       position: fixed;
-      inset: -10%;
+      inset: 0;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.32;
-      filter: blur(18px);
+      opacity: 0.14;
       background:
-        radial-gradient(circle at 10% 35%, rgba(255,255,255,0.1), transparent 18%),
-        radial-gradient(circle at 40% 60%, rgba(255,255,255,0.08), transparent 20%),
-        radial-gradient(circle at 70% 30%, rgba(255,255,255,0.07), transparent 18%),
-        radial-gradient(circle at 82% 70%, rgba(255,255,255,0.08), transparent 16%);
-      animation: fogDrift 26s linear infinite alternate;
+        radial-gradient(circle at 18% 35%, rgba(255,255,255,0.06), transparent 20%),
+        radial-gradient(circle at 72% 62%, rgba(255,255,255,0.05), transparent 18%),
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,0.04), transparent 16%);
+      animation: fogDrift 38s linear infinite alternate;
+      will-change: transform;
     }
 
     .fog-layer.two {
-      opacity: 0.22;
-      filter: blur(28px);
-      animation-duration: 34s;
-      transform: scale(1.15);
+      opacity: 0.08;
+      animation-duration: 52s;
+      transform: scale(1.04);
     }
 
     .wrap {
@@ -101,12 +99,12 @@
 
     .panel {
       width: min(1020px, 100%);
-      background: linear-gradient(180deg, rgba(10,10,10,0.86), rgba(8,8,8,0.92));
+      background: linear-gradient(180deg, rgba(10,10,10,0.94), rgba(8,8,8,0.97));
       border: 1px solid var(--border);
-      box-shadow: var(--shadow);
+      box-shadow: 0 0 24px rgba(167, 15, 15, 0.12);
       border-radius: 22px;
       padding: 34px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: none;
       position: relative;
       overflow: hidden;
     }
@@ -132,7 +130,7 @@
     .countdown-screen,
     .game-screen,
     .end-flash {
-      transition: opacity 1s ease, transform 1s ease, filter 1s ease;
+      transition: opacity 0.7s ease, transform 0.7s ease;
       position: relative;
       z-index: 1;
     }
@@ -143,8 +141,7 @@
 
     .fade-out {
       opacity: 0;
-      transform: scale(0.98);
-      filter: blur(10px);
+      transform: scale(0.985);
     }
 
     .eyebrow {
@@ -160,8 +157,8 @@
       font-size: clamp(2.8rem, 8vw, 6.3rem);
       line-height: 0.92;
       text-align: center;
-      text-shadow: 0 0 18px rgba(167, 15, 15, 0.28);
-      animation: lowFlicker 4.5s infinite;
+      text-shadow: 0 0 12px rgba(167, 15, 15, 0.18);
+      animation: lowFlicker 7s infinite;
     }
 
     .subtitle {
@@ -178,7 +175,7 @@
       display: inline;
       border-right: 1px solid rgba(255,255,255,0.6);
       padding-right: 2px;
-      animation: cursorBlink 0.8s step-end infinite;
+      animation: cursorBlink 1s step-end infinite;
     }
 
     .timer-shell {
@@ -189,10 +186,9 @@
 
     .timer-halo {
       position: absolute;
-      inset: -22px;
-      background: radial-gradient(circle, rgba(167,15,15,0.18), transparent 60%);
-      filter: blur(14px);
-      animation: pulseGlow 2.6s ease-in-out infinite;
+      inset: -14px;
+      background: radial-gradient(circle, rgba(167,15,15,0.12), transparent 65%);
+      animation: pulseGlow 3.8s ease-in-out infinite;
       pointer-events: none;
     }
 
@@ -213,12 +209,11 @@
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.09);
       text-align: center;
-      box-shadow: inset 0 0 18px rgba(255,255,255,0.015), 0 0 16px rgba(0,0,0,0.35);
     }
 
     .time-box.danger {
-      border-color: rgba(167,15,15,0.65);
-      box-shadow: 0 0 18px rgba(167,15,15,0.18), inset 0 0 18px rgba(167,15,15,0.08);
+      border-color: rgba(167,15,15,0.55);
+      box-shadow: 0 0 10px rgba(167,15,15,0.12);
     }
 
     .time-value {
@@ -265,7 +260,7 @@
       margin: 0 0 12px;
       font-size: clamp(2rem, 5vw, 4rem);
       line-height: 1;
-      animation: lowFlicker 5.4s infinite;
+      animation: lowFlicker 8s infinite;
     }
 
     .instructions {
@@ -291,21 +286,31 @@
       position: relative;
       overflow: hidden;
       opacity: 0;
-      transform: translateY(18px);
+      transform: translateY(12px);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
     }
 
     .clue-card::after {
       content: "";
       position: absolute;
-      inset: auto -40px -40px auto;
-      width: 120px;
-      height: 120px;
-      background: radial-gradient(circle, rgba(167,15,15,0.14), transparent 70%);
+      inset: auto -30px -30px auto;
+      width: 90px;
+      height: 90px;
+      background: radial-gradient(circle, rgba(167,15,15,0.1), transparent 70%);
       pointer-events: none;
     }
 
+    .clue-card:hover,
+    .clue-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(167,15,15,0.4);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+      outline: none;
+    }
+
     .clue-card.revealed {
-      animation: clueReveal 0.9s ease forwards, lowFlicker 6s 1.2s infinite;
+      animation: clueReveal 0.55s ease forwards;
     }
 
     .clue-number {
@@ -335,7 +340,6 @@
       border-radius: 18px;
       background: rgba(255,255,255,0.025);
       border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
     }
 
     .answer-box label {
@@ -403,7 +407,7 @@
 
     .ghost-text {
       position: fixed;
-      color: rgba(255,255,255,0.045);
+      color: rgba(255,255,255,0.035);
       font-size: clamp(1rem, 3vw, 2.3rem);
       letter-spacing: 0.34em;
       text-transform: uppercase;
@@ -411,7 +415,8 @@
       user-select: none;
       white-space: nowrap;
       z-index: 1;
-      animation: drift 22s linear infinite;
+      animation: drift 34s linear infinite;
+      will-change: transform;
     }
 
     .ghost-a { top: 10%; left: -20%; }
@@ -432,7 +437,9 @@
     }
 
     @keyframes fogDrift {
-      from { transform: translate3d(-2%, 0, 0) scale(1); }
+      from { transform: translate3d(-1%, 0, 0) scale(1); }
+      to { transform: translate3d(1%, -1%, 0) scale(1.03); }
+    }
       to { transform: translate3d(2%, -2%, 0) scale(1.08); }
     }
 
@@ -442,7 +449,9 @@
     }
 
     @keyframes pulseGlow {
-      0%, 100% { transform: scale(0.98); opacity: 0.55; }
+      0%, 100% { transform: scale(0.99); opacity: 0.45; }
+      50% { transform: scale(1.02); opacity: 0.85; }
+    }
       50% { transform: scale(1.04); opacity: 1; }
     }
 
@@ -452,13 +461,17 @@
     }
 
     @keyframes lowFlicker {
-      0%, 14%, 16%, 52%, 54%, 100% { opacity: 1; }
+      0%, 18%, 20%, 100% { opacity: 1; }
+      19% { opacity: 0.85; }
+    }
       15%, 53% { opacity: 0.72; }
       55% { opacity: 0.88; }
     }
 
     @keyframes clueReveal {
-      0% { opacity: 0; transform: translateY(22px) scale(0.98); filter: blur(8px); }
+      0% { opacity: 0; transform: translateY(16px) scale(0.99); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
       55% { opacity: 0.8; }
       100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
     }
@@ -532,7 +545,7 @@
         </div>
 
         <div class="clue-grid">
-          <article class="clue-card">
+          <article class="clue-card" tabindex="0" data-title="The Ringing Voice" data-detail="Call the number hidden in your invitation. Listen carefully because the recording repeats one word three times. Write down only that repeated word. This is fragment one, so it belongs at the very start of the final code.">
             <span class="clue-number">Clue 01</span>
             <h3>The Ringing Voice</h3>
             <p>
@@ -540,7 +553,7 @@
             </p>
           </article>
 
-          <article class="clue-card">
+          <article class="clue-card" tabindex="0" data-title="The Hanging Sign" data-detail="Go to the marked location and look for the paper or sign placed there. Copy the word exactly as written, including any unusual spelling. This is fragment two and should be placed directly after the first fragment with no spaces.">
             <span class="clue-number">Clue 02</span>
             <h3>The Hanging Sign</h3>
             <p>
@@ -548,7 +561,7 @@
             </p>
           </article>
 
-          <article class="clue-card">
+          <article class="clue-card" tabindex="0" data-title="The Buried Article" data-detail="Use the hint phrase to figure out which Wikipedia article you need. Once you find it, go to the third paragraph and take the first bolded word. That word becomes fragment three in your final code.">
             <span class="clue-number">Clue 03</span>
             <h3>The Buried Article</h3>
             <p>
@@ -556,7 +569,7 @@
             </p>
           </article>
 
-          <article class="clue-card">
+          <article class="clue-card" tabindex="0" data-title="The Daily Context" data-detail="Solve the assigned Contexto puzzle first. Do not use the answer as-is. Reverse the word letter by letter before adding it. The reversed version becomes fragment four in the final code.">
             <span class="clue-number">Clue 04</span>
             <h3>The Daily Context</h3>
             <p>
@@ -564,7 +577,7 @@
             </p>
           </article>
 
-          <article class="clue-card">
+          <article class="clue-card" tabindex="0" data-title="The Silent Hotline" data-detail="Call the second number and go through the menu options until you find the whispered word after the pause. Ignore the dead ends. That whispered word is fragment five and should be the last piece of the final code.">
             <span class="clue-number">Clue 05</span>
             <h3>The Silent Hotline</h3>
             <p>
@@ -572,13 +585,22 @@
             </p>
           </article>
 
-          <article class="clue-card">
+          <article class="clue-card" tabindex="0" data-title="Build the Phrase" data-detail="Take all five fragments in clue order from Clue 01 through Clue 05. Type them as one continuous code with no spaces in between. Unless a clue tells you otherwise, do not add punctuation.">
             <span class="clue-number">Final Rule</span>
             <h3>Build the Phrase</h3>
             <p>
               Combine the fragments in clue order. Remove spaces and punctuation unless a clue explicitly tells you otherwise.
             </p>
           </article>
+        </div>
+
+        <div id="clueModal" class="hidden" aria-hidden="true" style="position:fixed;inset:0;z-index:8;background:rgba(0,0,0,0.72);display:flex;align-items:center;justify-content:center;padding:20px;">
+          <div style="width:min(640px,100%);background:linear-gradient(180deg,rgba(12,12,12,0.98),rgba(8,8,8,0.98));border:1px solid rgba(167,15,15,0.35);border-radius:18px;padding:24px;position:relative;box-shadow:0 0 24px rgba(167,15,15,0.16);">
+            <button id="closeModal" type="button" style="position:absolute;top:14px;right:14px;min-width:auto;padding:8px 12px;">Close</button>
+            <div class="eyebrow">Clue details</div>
+            <h3 id="modalTitle" style="margin:0 0 12px;font-size:1.8rem;"></h3>
+            <p id="modalText" style="margin:0;color:#d8cfcf;line-height:1.75;"></p>
+          </div>
         </div>
 
         <div class="answer-box">
@@ -603,7 +625,7 @@
     const launchTime = Date.now() + 5000;
 
     const introText = "The page will reveal itself when the countdown reaches zero. For now, all you get is the waiting.";
-    const instructionsText = "Each clue leads to one piece of the final code. Gather every fragment, put them together in the correct order, and enter the completed phrase below. When the code is correct, the site can send players to your Google Form or the next stage of the game.";
+    const instructionsText = "Click each clue card to read the full details. Gather every fragment, place them in clue order, and enter them as one continuous code with no spaces in between. When the code is correct, the site can send players to your Google Form or the next stage of the game.";
 
     const countdownScreen = document.getElementById("countdownScreen");
     const gameScreen = document.getElementById("gameScreen");
@@ -623,6 +645,10 @@
     const resultMessage = document.getElementById("resultMessage");
     const soundToggle = document.getElementById("soundToggle");
     const clueCards = Array.from(document.querySelectorAll(".clue-card"));
+    const clueModal = document.getElementById("clueModal");
+    const closeModal = document.getElementById("closeModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalText = document.getElementById("modalText");
 
     const correctCode = "ringhollowarticleesreverwhisper";
     const redirectUrl = "https://forms.gle/example";
@@ -650,6 +676,21 @@
       }
 
       typeNext();
+    }
+
+    function openModal(title, detail) {
+      modalTitle.textContent = title;
+      modalText.textContent = detail;
+      clueModal.classList.remove("hidden");
+      clueModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      playClickTone();
+    }
+
+    function closeModalWindow() {
+      clueModal.classList.add("hidden");
+      clueModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
     }
 
     // Audio setup for ambient tension and stingers.
@@ -835,11 +876,31 @@
       }
     }
 
-    typeText(subtitleType, introText, 24);
-    const countdownInterval = setInterval(updateCountdown, 200);
+    typeText(subtitleType, introText, 18);
+    const countdownInterval = setInterval(updateCountdown, 250);
     updateCountdown();
 
     soundToggle.addEventListener("click", toggleSound);
+    clueCards.forEach((card) => {
+      card.addEventListener("click", () => openModal(card.dataset.title, card.dataset.detail));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openModal(card.dataset.title, card.dataset.detail);
+        }
+      });
+    });
+    closeModal.addEventListener("click", closeModalWindow);
+    clueModal.addEventListener("click", (event) => {
+      if (event.target === clueModal) {
+        closeModalWindow();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !clueModal.classList.contains("hidden")) {
+        closeModalWindow();
+      }
+    });
     submitCodeBtn.addEventListener("click", checkCode);
     finalCodeInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
