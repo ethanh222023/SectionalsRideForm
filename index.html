@@ -7,16 +7,11 @@
   <style>
     :root {
       --bg: #020202;
-      --panel: rgba(8, 8, 8, 0.78);
-      --panel-2: rgba(14, 14, 14, 0.9);
-      --border: rgba(167, 18, 18, 0.35);
-      --border-soft: rgba(255, 255, 255, 0.08);
+      --panel: rgba(7, 7, 7, 0.95);
+      --border: rgba(167, 18, 18, 0.34);
       --text: #efe8e8;
-      --muted: #a79a9a;
+      --muted: #aaa0a0;
       --accent: #a70f0f;
-      --accent-glow: rgba(167, 15, 15, 0.28);
-      --shadow: 0 0 40px rgba(167, 15, 15, 0.18);
-      --success: #dad6d6;
     }
 
     * {
@@ -35,10 +30,10 @@
       overflow-x: hidden;
       position: relative;
       background:
-        radial-gradient(circle at 15% 20%, rgba(167, 15, 15, 0.12), transparent 22%),
-        radial-gradient(circle at 82% 30%, rgba(167, 15, 15, 0.09), transparent 28%),
-        radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.03), transparent 30%),
-        linear-gradient(180deg, #010101 0%, #070707 48%, #020202 100%);
+        radial-gradient(circle at 50% 0%, rgba(120, 0, 0, 0.12), transparent 24%),
+        radial-gradient(circle at 18% 18%, rgba(150, 0, 0, 0.08), transparent 18%),
+        radial-gradient(circle at 82% 28%, rgba(150, 0, 0, 0.06), transparent 22%),
+        linear-gradient(180deg, #020202 0%, #060606 55%, #010101 100%);
     }
 
     body::before {
@@ -48,13 +43,12 @@
       pointer-events: none;
       background: repeating-linear-gradient(
         to bottom,
-        rgba(255,255,255,0.016) 0px,
-        rgba(255,255,255,0.016) 1px,
+        rgba(255,255,255,0.012) 0px,
+        rgba(255,255,255,0.012) 1px,
         transparent 2px,
         transparent 4px
       );
-      opacity: 0.22;
-      mix-blend-mode: screen;
+      opacity: 0.18;
       z-index: 2;
     }
 
@@ -67,25 +61,66 @@
       z-index: 2;
     }
 
-    .fog-layer {
+    .fog-layer,
+    .fog-layer.two,
+    .haze,
+    .vignette-red {
       position: fixed;
       inset: 0;
       pointer-events: none;
+    }
+
+    .fog-layer {
       z-index: 0;
-      opacity: 0.14;
+      opacity: 0.18;
       background:
-        radial-gradient(circle at 18% 35%, rgba(255,255,255,0.06), transparent 20%),
-        radial-gradient(circle at 72% 62%, rgba(255,255,255,0.05), transparent 18%),
-        radial-gradient(circle at 50% 18%, rgba(255,255,255,0.04), transparent 16%);
-      animation: fogDrift 38s linear infinite alternate;
+        radial-gradient(circle at 20% 38%, rgba(255,255,255,0.07), transparent 18%),
+        radial-gradient(circle at 70% 60%, rgba(255,255,255,0.05), transparent 15%),
+        radial-gradient(circle at 48% 18%, rgba(255,255,255,0.04), transparent 12%);
+      animation: fogDrift 34s linear infinite alternate;
       will-change: transform;
     }
 
     .fog-layer.two {
-      opacity: 0.08;
-      animation-duration: 52s;
-      transform: scale(1.04);
+      z-index: 0;
+      opacity: 0.1;
+      background:
+        radial-gradient(circle at 12% 78%, rgba(255,255,255,0.05), transparent 14%),
+        radial-gradient(circle at 84% 30%, rgba(255,255,255,0.04), transparent 16%),
+        radial-gradient(circle at 52% 56%, rgba(255,255,255,0.035), transparent 15%);
+      animation: fogDriftReverse 48s linear infinite alternate;
+      will-change: transform;
     }
+
+    .haze {
+      z-index: 0;
+      background: radial-gradient(circle at 50% 44%, rgba(167,15,15,0.14), transparent 34%);
+      opacity: 0.9;
+    }
+
+    .vignette-red {
+      z-index: 0;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 48%, rgba(100,0,0,0.12) 72%, rgba(0,0,0,0.45) 100%);
+      opacity: 0.9;
+    }
+
+    .ghost-text {
+      position: fixed;
+      color: rgba(255,255,255,0.04);
+      font-size: clamp(1rem, 3vw, 2.3rem);
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      z-index: 1;
+      animation: drift 32s linear infinite;
+      will-change: transform;
+    }
+
+    .ghost-a { top: 10%; left: -20%; }
+    .ghost-b { bottom: 14%; right: -30%; animation-duration: 26s; }
 
     .wrap {
       min-height: 100vh;
@@ -98,13 +133,12 @@
     }
 
     .panel {
-      width: min(1020px, 100%);
-      background: linear-gradient(180deg, rgba(10,10,10,0.94), rgba(8,8,8,0.97));
+      width: min(1040px, 100%);
+      background: linear-gradient(180deg, rgba(9,9,9,0.96), rgba(6,6,6,0.98));
       border: 1px solid var(--border);
       box-shadow: 0 0 24px rgba(167, 15, 15, 0.12);
       border-radius: 22px;
       padding: 34px;
-      backdrop-filter: none;
       position: relative;
       overflow: hidden;
     }
@@ -123,8 +157,8 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: radial-gradient(circle at 50% 0%, rgba(167,15,15,0.12), transparent 28%);
-      opacity: 0.85;
+      background: radial-gradient(circle at 50% 0%, rgba(167,15,15,0.13), transparent 24%);
+      opacity: 0.9;
     }
 
     .countdown-screen,
@@ -136,7 +170,7 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     .fade-out {
@@ -152,23 +186,36 @@
       margin-bottom: 18px;
     }
 
+    .omen-line,
+    .under-line {
+      text-align: center;
+      color: rgba(255,255,255,0.08);
+      text-transform: uppercase;
+      letter-spacing: 0.32em;
+      font-size: 0.72rem;
+    }
+
+    .omen-line { margin-bottom: 12px; }
+    .under-line { margin-top: 12px; }
+
     .title {
       margin: 0 0 14px;
-      font-size: clamp(2.8rem, 8vw, 6.3rem);
+      font-size: clamp(2.8rem, 8vw, 6.4rem);
       line-height: 0.92;
       text-align: center;
-      text-shadow: 0 0 12px rgba(167, 15, 15, 0.18);
+      text-shadow: 0 0 12px rgba(167, 15, 15, 0.22), 0 0 34px rgba(167, 15, 15, 0.1);
       animation: lowFlicker 7s infinite;
     }
 
     .subtitle {
       text-align: center;
-      color: var(--muted);
+      color: #c1b8b8;
       max-width: 720px;
       margin: 0 auto 22px;
       font-size: 1rem;
       line-height: 1.7;
       min-height: 3.4em;
+      text-shadow: 0 0 12px rgba(0,0,0,0.45);
     }
 
     .type-line {
@@ -184,10 +231,19 @@
       width: fit-content;
     }
 
+    .timer-shell::before {
+      content: "";
+      position: absolute;
+      inset: -16px;
+      border: 1px solid rgba(167,15,15,0.16);
+      border-radius: 26px;
+      pointer-events: none;
+    }
+
     .timer-halo {
       position: absolute;
-      inset: -14px;
-      background: radial-gradient(circle, rgba(167,15,15,0.12), transparent 65%);
+      inset: -18px;
+      background: radial-gradient(circle, rgba(167,15,15,0.14), transparent 68%);
       animation: pulseGlow 3.8s ease-in-out infinite;
       pointer-events: none;
     }
@@ -206,14 +262,15 @@
       min-width: 120px;
       padding: 20px 16px;
       border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.09);
+      background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
       text-align: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
     }
 
     .time-box.danger {
       border-color: rgba(167,15,15,0.55);
-      box-shadow: 0 0 10px rgba(167,15,15,0.12);
+      box-shadow: 0 0 12px rgba(167,15,15,0.14);
     }
 
     .time-value {
@@ -233,9 +290,10 @@
     .status-line {
       text-align: center;
       min-height: 1.5em;
-      color: #d2c3c3;
-      letter-spacing: 0.11em;
+      color: #e3d5d5;
+      letter-spacing: 0.14em;
       margin-top: 18px;
+      text-shadow: 0 0 10px rgba(167,15,15,0.14);
     }
 
     .sound-toggle {
@@ -248,8 +306,8 @@
       min-width: auto;
       padding: 10px 16px;
       font-size: 0.92rem;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
     }
 
     .game-header {
@@ -264,9 +322,9 @@
     }
 
     .instructions {
-      color: var(--muted);
+      color: #b7adad;
       line-height: 1.8;
-      max-width: 770px;
+      max-width: 800px;
       min-height: 5.5em;
     }
 
@@ -275,20 +333,22 @@
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 18px;
       margin: 32px 0;
+      min-height: 300px;
     }
 
     .clue-card {
       padding: 20px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018));
-      border: 1px solid rgba(255,255,255,0.07);
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.14);
       min-height: 210px;
       position: relative;
       overflow: hidden;
       opacity: 0;
       transform: translateY(12px);
       cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 12px rgba(0,0,0,0.2);
     }
 
     .clue-card::after {
@@ -304,8 +364,9 @@
     .clue-card:hover,
     .clue-card:focus-visible {
       transform: translateY(-2px);
-      border-color: rgba(167,15,15,0.4);
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+      border-color: rgba(167,15,15,0.52);
+      background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.035));
+      box-shadow: 0 0 16px rgba(167,15,15,0.12);
       outline: none;
     }
 
@@ -316,7 +377,7 @@
     .clue-number {
       display: inline-block;
       font-size: 0.8rem;
-      color: #d7c0c0;
+      color: #e0cfcf;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       margin-bottom: 12px;
@@ -325,13 +386,55 @@
     .clue-card h3 {
       margin: 0 0 10px;
       font-size: 1.16rem;
+      color: #f0e6e6;
+      text-shadow: 0 0 8px rgba(0,0,0,0.35);
     }
 
     .clue-card p {
       margin: 0;
       line-height: 1.7;
-      color: #e3dcdc;
+      color: #ded4d4;
       font-size: 0.98rem;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 8;
+      background: rgba(0,0,0,0.76);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-box {
+      width: min(640px, 100%);
+      background: linear-gradient(180deg, rgba(12,12,12,0.985), rgba(8,8,8,0.985));
+      border: 1px solid rgba(167,15,15,0.35);
+      border-radius: 18px;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 0 24px rgba(167,15,15,0.16);
+    }
+
+    .modal-title {
+      margin: 0 0 12px;
+      font-size: 1.8rem;
+    }
+
+    .modal-text {
+      margin: 0;
+      color: #d8cfcf;
+      line-height: 1.75;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      min-width: auto;
+      padding: 8px 12px;
     }
 
     .answer-box {
@@ -405,30 +508,13 @@
       line-height: 1.7;
     }
 
-    .ghost-text {
-      position: fixed;
-      color: rgba(255,255,255,0.035);
-      font-size: clamp(1rem, 3vw, 2.3rem);
-      letter-spacing: 0.34em;
-      text-transform: uppercase;
-      pointer-events: none;
-      user-select: none;
-      white-space: nowrap;
-      z-index: 1;
-      animation: drift 34s linear infinite;
-      will-change: transform;
-    }
-
-    .ghost-a { top: 10%; left: -20%; }
-    .ghost-b { bottom: 14%; right: -30%; animation-duration: 28s; }
-
     .end-flash {
       position: fixed;
       inset: 0;
       z-index: 5;
       pointer-events: none;
       background:
-        radial-gradient(circle at center, rgba(255,255,255,0.8), rgba(167,15,15,0.25) 20%, rgba(0,0,0,0.96) 55%);
+        radial-gradient(circle at center, rgba(255,255,255,0.8), rgba(167,15,15,0.26) 20%, rgba(0,0,0,0.96) 55%);
       opacity: 0;
     }
 
@@ -440,7 +526,10 @@
       from { transform: translate3d(-1%, 0, 0) scale(1); }
       to { transform: translate3d(1%, -1%, 0) scale(1.03); }
     }
-      to { transform: translate3d(2%, -2%, 0) scale(1.08); }
+
+    @keyframes fogDriftReverse {
+      from { transform: translate3d(1%, 1%, 0) scale(1.02); }
+      to { transform: translate3d(-1%, 0, 0) scale(1.05); }
     }
 
     @keyframes drift {
@@ -452,8 +541,6 @@
       0%, 100% { transform: scale(0.99); opacity: 0.45; }
       50% { transform: scale(1.02); opacity: 0.85; }
     }
-      50% { transform: scale(1.04); opacity: 1; }
-    }
 
     @keyframes cursorBlink {
       0%, 49% { border-color: rgba(255,255,255,0.65); }
@@ -464,16 +551,10 @@
       0%, 18%, 20%, 100% { opacity: 1; }
       19% { opacity: 0.85; }
     }
-      15%, 53% { opacity: 0.72; }
-      55% { opacity: 0.88; }
-    }
 
     @keyframes clueReveal {
       0% { opacity: 0; transform: translateY(16px) scale(0.99); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-      55% { opacity: 0.8; }
-      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
     }
 
     @keyframes endFlash {
@@ -497,6 +578,8 @@
 <body>
   <div class="fog-layer"></div>
   <div class="fog-layer two"></div>
+  <div class="haze"></div>
+  <div class="vignette-red"></div>
   <div class="ghost-text ghost-a">it is almost time</div>
   <div class="ghost-text ghost-b">find what was hidden</div>
   <div id="endFlash" class="end-flash"></div>
@@ -505,6 +588,7 @@
     <div class="panel">
       <section id="countdownScreen" class="countdown-screen">
         <div class="eyebrow">Access restricted</div>
+        <div class="omen-line">something is waiting behind the glass</div>
         <h1 class="title">The Hunt Opens Soon</h1>
         <p class="subtitle"><span id="subtitleType" class="type-line"></span></p>
 
@@ -531,9 +615,10 @@
         </div>
 
         <div id="statusLine" class="status-line">Do not look away.</div>
+        <div class="under-line">when the numbers die, the page wakes up</div>
 
         <div class="sound-toggle">
-          <button id="soundToggle" type="button">Sound: Off</button>
+          <button id="soundToggle" type="button">Sound: On</button>
         </div>
       </section>
 
@@ -594,12 +679,12 @@
           </article>
         </div>
 
-        <div id="clueModal" class="hidden" aria-hidden="true" style="position:fixed;inset:0;z-index:8;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;padding:20px;">
-          <div style="width:min(640px,100%);background:linear-gradient(180deg,rgba(12,12,12,0.98),rgba(8,8,8,0.98));border:1px solid rgba(167,15,15,0.35);border-radius:18px;padding:24px;position:relative;box-shadow:0 0 24px rgba(167,15,15,0.16);">
-            <button id="closeModal" type="button" style="position:absolute;top:14px;right:14px;min-width:auto;padding:8px 12px;">Close</button>
+        <div id="clueModal" class="modal-overlay hidden" aria-hidden="true">
+          <div class="modal-box">
+            <button id="closeModal" class="modal-close" type="button">Close</button>
             <div class="eyebrow">Clue details</div>
-            <h3 id="modalTitle" style="margin:0 0 12px;font-size:1.8rem;"></h3>
-            <p id="modalText" style="margin:0;color:#d8cfcf;line-height:1.75;"></p>
+            <h3 id="modalTitle" class="modal-title"></h3>
+            <p id="modalText" class="modal-text"></p>
           </div>
         </div>
 
@@ -621,7 +706,6 @@
   </div>
 
   <script>
-    // Set a short test countdown.
     const launchTime = Date.now() + 5000;
 
     const introText = "The page will reveal itself when the countdown reaches zero. For now, all you get is the waiting.";
@@ -653,14 +737,13 @@
     const correctCode = "ringhollowarticleesreverwhisper";
     const redirectUrl = "https://forms.gle/example";
 
-    let audioEnabled = false;
+    let audioEnabled = true;
     let audioCtx = null;
     let ambientOsc = null;
     let ambientGain = null;
     let ambientLfo = null;
     let ambientLfoGain = null;
 
-    // Typewriter effect for intro and instructions.
     function typeText(element, text, speed = 26, callback) {
       element.textContent = "";
       let i = 0;
@@ -682,7 +765,6 @@
       modalTitle.textContent = title;
       modalText.textContent = detail;
       clueModal.classList.remove("hidden");
-      clueModal.style.display = "flex";
       clueModal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
       playClickTone();
@@ -690,12 +772,10 @@
 
     function closeModalWindow() {
       clueModal.classList.add("hidden");
-      clueModal.style.display = "none";
       clueModal.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
     }
 
-    // Audio setup for ambient tension and stingers.
     function initAudio() {
       if (audioCtx) return;
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -723,13 +803,19 @@
       ambientLfo.start();
     }
 
-    async function toggleSound() {
+    async function ensureAudioStarted() {
       initAudio();
-
       if (audioCtx.state === "suspended") {
         await audioCtx.resume();
       }
+      if (audioEnabled) {
+        ambientGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        ambientGain.gain.linearRampToValueAtTime(0.018, audioCtx.currentTime + 1.2);
+      }
+    }
 
+    async function toggleSound() {
+      await ensureAudioStarted();
       audioEnabled = !audioEnabled;
       soundToggle.textContent = `Sound: ${audioEnabled ? "On" : "Off"}`;
 
@@ -789,7 +875,6 @@
       setTimeout(() => playTone({ frequency: 420, duration: 0.15, type: "triangle", volume: 0.018, slideTo: 520 }), 90);
     }
 
-    // Update the timer and reveal the game when it expires.
     let previousSecond = null;
     function updateCountdown() {
       const now = Date.now();
@@ -831,7 +916,6 @@
       }
     }
 
-    // Dramatic reveal sequence.
     function revealGame() {
       if (!gameScreen.classList.contains("hidden")) return;
 
@@ -847,7 +931,6 @@
       }, 900);
     }
 
-    // Stagger clue reveal animation.
     function revealClues() {
       clueCards.forEach((card, index) => {
         setTimeout(() => {
@@ -857,7 +940,6 @@
       });
     }
 
-    // Validate the final code and redirect when correct.
     function checkCode() {
       const userValue = finalCodeInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 
@@ -882,6 +964,13 @@
     typeText(subtitleType, introText, 18);
     const countdownInterval = setInterval(updateCountdown, 250);
     updateCountdown();
+
+    document.addEventListener("click", async () => {
+      try {
+        await ensureAudioStarted();
+      } catch (error) {
+      }
+    }, { once: true });
 
     soundToggle.addEventListener("click", toggleSound);
     clueCards.forEach((card) => {
