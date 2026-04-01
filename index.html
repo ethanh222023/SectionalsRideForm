@@ -640,9 +640,9 @@
         <div class="under-line">when the numbers die, the page wakes up</div>
 
         <div class="sound-toggle">
-          <button id="soundToggle" type="button">Sound: On</button>
+          <button id="soundToggle" type="button">Sound: Off</button>
         </div>
-        <div class="sound-note">Browsers block autoplay. The first click or key press arms the audio.</div>
+        <div class="sound-note">Turn sound on for the full experience.</div>
       </section>
 
       <section id="gameScreen" class="game-screen hidden">
@@ -710,7 +710,7 @@
 
         <div class="sound-config">
           <h3>Sound configuration</h3>
-          <p>Edit the values inside the <code>SOUND</code> object near the top of the script to change every effect. You can adjust countdown ambience, post-reveal ambience, countdown ticks, clicks, success, failure, and the reveal stinger without digging through the rest of the code like a goblin in a crawlspace.</p>
+          <p>Edit the values inside the <code>SOUND</code> object near the top of the script to change every sound yourself. You can swap tone shapes, pitches, durations, volumes, and slide targets for countdown ambience, post-reveal ambience, countdown ticks, clicks, success, failure, reveal stinger, and clue reveals.</p>
         </div>
 
         <p class="hint-note">
@@ -767,7 +767,7 @@
     const correctCode = "ringhollowarticleesreverwhisper";
     const redirectUrl = "https://forms.gle/example";
 
-    let audioEnabled = true;
+    let audioEnabled = false;
     let audioCtx = null;
     let audioArmed = false;
     let ambientCountdownOsc = null;
@@ -853,9 +853,15 @@
         await audioCtx.resume();
       }
       audioArmed = true;
-      if (audioEnabled) {
-        ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
-        ambientCountdownGain.gain.linearRampToValueAtTime(SOUND.ambientCountdown.gain, audioCtx.currentTime + 0.8);
+    }
+
+    function setCountdownAmbience(active) {
+      if (!audioCtx) return;
+      ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      if (active && audioEnabled) {
+        ambientCountdownGain.gain.linearRampToValueAtTime(SOUND.ambientCountdown.gain, audioCtx.currentTime + 0.5);
+      } else {
+        ambientCountdownGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
       }
     }
 
@@ -863,7 +869,7 @@
       if (!audioCtx) return;
       ambientRevealGain.gain.cancelScheduledValues(audioCtx.currentTime);
       if (active && audioEnabled) {
-        ambientRevealGain.gain.linearRampToValueAtTime(SOUND.ambientReveal.gain, audioCtx.currentTime + 1.1);
+        ambientRevealGain.gain.linearRampToValueAtTime(SOUND.ambientReveal.gain, audioCtx.currentTime + 0.8);
       } else {
         ambientRevealGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
       }
@@ -873,20 +879,15 @@
       await ensureAudioStarted();
       audioEnabled = !audioEnabled;
       soundToggle.textContent = `Sound: ${audioEnabled ? "On" : "Off"}`;
+      setCountdownAmbience(!countdownScreen.classList.contains("hidden"));
+      setRevealAmbience(!gameScreen.classList.contains("hidden"));
       if (audioEnabled) {
-        ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
-        ambientCountdownGain.gain.linearRampToValueAtTime(SOUND.ambientCountdown.gain, audioCtx.currentTime + 0.5);
-        setRevealAmbience(!gameScreen.classList.contains("hidden"));
         playClickTone();
-      } else {
-        ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
-        ambientCountdownGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
-        setRevealAmbience(false);
       }
     }
 
     function playTone(config) {
-      if (!audioEnabled || !audioCtx) return;
+      if (!audioEnabled || !audioCtx || !audioArmed) return;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = config.wave || "sine";
@@ -961,15 +962,19 @@
     async function revealGame() {
       if (!gameScreen.classList.contains("hidden")) return;
       clearInterval(countdownInterval);
+
       if (audioEnabled && !audioArmed) {
         try { await ensureAudioStarted(); } catch (error) {}
       }
+
       playRevealStinger();
       endFlash.classList.add("active");
       countdownScreen.classList.add("fade-out");
+
       setTimeout(() => {
         countdownScreen.classList.add("hidden");
         gameScreen.classList.remove("hidden");
+        setCountdownAmbience(false);
         setRevealAmbience(true);
         typeText(instructionsType, instructionsText, 18, revealClues);
       }, 900);
@@ -1008,19 +1013,11 @@
       }
     }
 
-    async function armAudioFromGesture() {
-      if (audioArmed) return;
-      try { await ensureAudioStarted(); } catch (error) {}
-    }
-
     closeModalWindow();
+    soundToggle.textContent = "Sound: Off";
     typeText(subtitleType, introText, 18);
     const countdownInterval = setInterval(updateCountdown, 250);
     updateCountdown();
-
-    ["pointerdown", "keydown", "touchstart"].forEach((eventName) => {
-      document.addEventListener(eventName, armAudioFromGesture, { once: true });
-    });
 
     soundToggle.addEventListener("click", toggleSound);
     clueCards.forEach((card) => {
