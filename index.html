@@ -34,6 +34,35 @@
         linear-gradient(180deg, #020202 0%, #060606 55%, #010101 100%);
     }
 
+    #landingScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(120, 0, 0, 0.14), transparent 28%),
+        linear-gradient(180deg, rgba(0,0,0,0.94), rgba(0,0,0,0.98));
+    }
+
+    #enterSiteBtn {
+      min-width: auto;
+      padding: 18px 28px;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+    }
+
+    .landing-note {
+      margin-top: 14px;
+      color: rgba(255,255,255,0.42);
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+    }
+
     body::before {
       content: "";
       position: fixed;
@@ -605,6 +634,12 @@
   </style>
 </head>
 <body>
+
+  <div id="landingScreen">
+    <button id="enterSiteBtn" type="button">Enter if you dare</button>
+    <div class="landing-note">best experienced with sound</div>
+  </div>
+
   <div class="fog"></div>
   <div class="fog-two"></div>
   <div class="red-haze"></div>
@@ -655,11 +690,6 @@
 
         <div id="statusLine" class="status-line">Do not look away.</div>
         <div class="under-line">when the numbers die, the page wakes up</div>
-
-        <div class="sound-toggle">
-          <button id="soundToggle" type="button">Sound: Off</button>
-        </div>
-        <div class="sound-note">Turn sound on for the full experience.</div>
       </section>
 
       <section id="gameScreen" class="game-screen hidden">
@@ -770,7 +800,8 @@
     const finalCodeInput = document.getElementById("finalCode");
     const submitCodeBtn = document.getElementById("submitCode");
     const resultMessage = document.getElementById("resultMessage");
-    const soundToggle = document.getElementById("soundToggle");
+    const landingScreen = document.getElementById("landingScreen");
+    const enterSiteBtn = document.getElementById("enterSiteBtn");
     const clueCards = Array.from(document.querySelectorAll(".clue-card"));
     const clueModal = document.getElementById("clueModal");
     const closeModal = document.getElementById("closeModal");
@@ -852,15 +883,6 @@
       }
     }
 
-    async function toggleSound() {
-      audioEnabled = !audioEnabled;
-      soundToggle.textContent = `Sound: ${audioEnabled ? "On" : "Off"}`;
-
-      if (!audioEnabled) {
-        stopAllSounds();
-        return;
-      }
-
       updateAmbientSounds();
       resetAndPlay(AUDIO.click);
     }
@@ -932,7 +954,6 @@
       clearInterval(countdownInterval);
 
       audioEnabled = true;
-      soundToggle.textContent = "Sound: On";
       stopAudio(AUDIO.tick);
       stopAudio(AUDIO.countdownAmbient);
 
@@ -991,12 +1012,27 @@
     }
 
     closeModalWindow();
-    soundToggle.textContent = "Sound: Off";
     typeText(subtitleType, introText, 18);
     const countdownInterval = setInterval(updateCountdown, 250);
     updateCountdown();
 
-    soundToggle.addEventListener("click", toggleSound);
+
+    async function enterSite() {
+      audioEnabled = true;
+      landingScreen.classList.add("hidden");
+
+      try {
+        if (typeof unlockAudio === "function") {
+          await unlockAudio();
+        }
+      } catch (error) {}
+
+      updateAmbientSounds();
+      playClickSound();
+    }
+
+    enterSiteBtn.addEventListener("click", enterSite);
+
     clueCards.forEach((card) => {
       card.addEventListener("click", () => openModal(card.dataset.title, card.dataset.detail));
       card.addEventListener("keydown", (event) => {
