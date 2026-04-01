@@ -778,7 +778,7 @@
   </div>
 
   <script>
-    const targetLaunchDate = new Date("2026-04-01T16:22:00");
+    const targetLaunchDate = new Date("2026-04-01T16:29:00");
     // Change the date and time above to test. Example format: YYYY-MM-DDTHH:MM:SS
     let launchTime = targetLaunchDate.getTime();
     let countdownInterval = null;
@@ -895,19 +895,22 @@
       siteStarted = true;
       launchTime = targetLaunchDate.getTime();
       previousSecond = null;
+      previousTickSecond = null;
 
       landingScreen.classList.add("fade-out");
       setTimeout(() => {
         landingScreen.classList.add("hidden");
-        enableAudio();
-        resetAndPlay(AUDIO.click);
 
         if (Date.now() >= launchTime) {
+          enableAudio();
+          resetAndPlay(AUDIO.click);
           revealGame();
           return;
         }
 
         countdownScreen.classList.remove("hidden");
+        enableAudio();
+        resetAndPlay(AUDIO.click);
         typeText(subtitleType, introText, 18);
         countdownInterval = setInterval(updateCountdown, 250);
         updateCountdown();
@@ -935,6 +938,7 @@
     }
 
     let previousSecond = null;
+    let previousTickSecond = null;
     function updateCountdown() {
       if (!launchTime) return;
 
@@ -947,7 +951,7 @@
         secondsEl.textContent = 0;
         statusLine.textContent = "It is open.";
         stopAudio(AUDIO.tick);
-        stopAudio(AUDIO.tick);
+        previousTickSecond = null;
         revealGame();
         return;
       }
@@ -963,9 +967,15 @@
       minutesEl.textContent = minutes;
       secondsEl.textContent = seconds;
 
-      if (previousSecond !== seconds && seconds <= 4) {
+      if (diff <= 60000) {
         secondsBox.classList.add("danger");
-        playTickSound();
+        if (previousTickSecond !== totalSeconds) {
+          playTickSound();
+          previousTickSecond = totalSeconds;
+        }
+      } else {
+        secondsBox.classList.remove("danger");
+        previousTickSecond = null;
       }
       previousSecond = seconds;
 
