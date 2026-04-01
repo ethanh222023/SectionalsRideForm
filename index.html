@@ -757,15 +757,15 @@
     const SOUND = {
       ambientCountdown: { wave: "sine", baseFreq: 46, lfoFreq: 0.18, lfoDepth: 0.0035, gain: 0.018 },
       ambientReveal: { wave: "triangle", baseFreq: 92, lfoFreq: 0.11, lfoDepth: 0.0025, gain: 0.012 },
-      tick: { wave: "triangle", frequency: 150, duration: 0.08, volume: 0.012, slideTo: 120 },
-      click: { wave: "square", frequency: 300, duration: 0.09, volume: 0.015, slideTo: 210 },
-      wrong: { wave: "square", frequency: 170, duration: 0.12, volume: 0.02, slideTo: 120 },
-      successA: { wave: "triangle", frequency: 340, duration: 0.12, volume: 0.018, slideTo: 420 },
-      successB: { wave: "triangle", frequency: 420, duration: 0.15, volume: 0.018, slideTo: 520 },
-      revealA: { wave: "sawtooth", frequency: 190, duration: 0.25, volume: 0.018, slideTo: 120 },
-      revealB: { wave: "sine", frequency: 90, duration: 0.6, volume: 0.04, slideTo: 50 },
-      revealC: { wave: "triangle", frequency: 420, duration: 0.14, volume: 0.012, slideTo: 620 },
-      clueRevealBase: { wave: "triangle", duration: 0.09, volume: 0.01 }
+      tick: { wave: "triangle", frequency: 150, duration: 0.08, volume: 0.02, slideTo: 120 },
+      click: { wave: "square", frequency: 300, duration: 0.09, volume: 0.022, slideTo: 210 },
+      wrong: { wave: "square", frequency: 170, duration: 0.12, volume: 0.03, slideTo: 120 },
+      successA: { wave: "triangle", frequency: 340, duration: 0.12, volume: 0.03, slideTo: 420 },
+      successB: { wave: "triangle", frequency: 420, duration: 0.15, volume: 0.03, slideTo: 520 },
+      revealA: { wave: "sawtooth", frequency: 190, duration: 0.25, volume: 0.03, slideTo: 120 },
+      revealB: { wave: "sine", frequency: 90, duration: 0.6, volume: 0.05, slideTo: 50 },
+      revealC: { wave: "triangle", frequency: 420, duration: 0.14, volume: 0.025, slideTo: 620 },
+      clueRevealBase: { wave: "triangle", duration: 0.09, volume: 0.02 }
     };
 
     const countdownScreen = document.getElementById("countdownScreen");
@@ -800,17 +800,6 @@
       success: document.getElementById("audio-success"),
       revealStinger: document.getElementById("audio-reveal-stinger"),
       clueReveal: document.getElementById("audio-clue-reveal")
-    };
-
-    const AUDIO_FILE_AVAILABLE = {
-      countdownAmbient: false,
-      revealAmbient: false,
-      tick: false,
-      click: false,
-      wrong: false,
-      success: false,
-      revealStinger: false,
-      clueReveal: false
     };
 
     const correctCode = "cheeniscrackerkangaroopenguinbadbreath";
@@ -924,26 +913,12 @@
       osc.stop(audioCtx.currentTime + config.duration + 0.04);
     }
 
-    function markAudioAvailability() {
-      Object.entries(AUDIO).forEach(([key, audioEl]) => {
-        if (!audioEl) return;
-        const setAvailable = () => { AUDIO_FILE_AVAILABLE[key] = true; };
-        const setUnavailable = () => { AUDIO_FILE_AVAILABLE[key] = false; };
-        audioEl.addEventListener("canplaythrough", setAvailable, { once: true });
-        audioEl.addEventListener("loadeddata", setAvailable, { once: true });
-        audioEl.addEventListener("error", setUnavailable);
-        if (audioEl.readyState >= 2 && !audioEl.error) {
-          AUDIO_FILE_AVAILABLE[key] = true;
-        }
-      });
+    function canUseFile(audioEl) {
+      return !!audioEl && !!audioEl.getAttribute("src") && audioEl.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE && !audioEl.error;
     }
 
-    function isUsableAudio(key, audioEl) {
-      return !!audioEl && !!audioEl.getAttribute("src") && AUDIO_FILE_AVAILABLE[key] === true;
-    }
-
-    function resetAndPlay(key, audioEl) {
-      if (!audioEnabled || !isUsableAudio(key, audioEl)) return false;
+    function resetAndPlay(audioEl) {
+      if (!audioEnabled || !canUseFile(audioEl)) return false;
       try {
         audioEl.pause();
         audioEl.currentTime = 0;
@@ -957,8 +932,8 @@
       }
     }
 
-    function playLoop(key, audioEl) {
-      if (!audioEnabled || !isUsableAudio(key, audioEl)) return false;
+    function playLoop(audioEl) {
+      if (!audioEnabled || !canUseFile(audioEl)) return false;
       try {
         audioEl.loop = true;
         const playPromise = audioEl.play();
@@ -999,7 +974,7 @@
       }
 
       if (!countdownScreen.classList.contains("hidden")) {
-        const usedFile = playLoop("countdownAmbient", AUDIO.countdownAmbient);
+        const usedFile = playLoop(AUDIO.countdownAmbient);
         if (!usedFile && audioCtx && audioUnlocked) {
           ambientRevealGain.gain.cancelScheduledValues(audioCtx.currentTime);
           ambientRevealGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2);
@@ -1012,7 +987,7 @@
       }
 
       if (!gameScreen.classList.contains("hidden")) {
-        const usedFile = playLoop("revealAmbient", AUDIO.revealAmbient);
+        const usedFile = playLoop(AUDIO.revealAmbient);
         if (!usedFile && audioCtx && audioUnlocked) {
           ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
           ambientCountdownGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2);
@@ -1040,22 +1015,22 @@
     }
 
     function playTickSound() {
-      const usedFile = resetAndPlay("tick", AUDIO.tick);
+      const usedFile = resetAndPlay(AUDIO.tick);
       if (!usedFile) playTone(SOUND.tick);
     }
 
     function playClickSound() {
-      const usedFile = resetAndPlay("click", AUDIO.click);
+      const usedFile = resetAndPlay(AUDIO.click);
       if (!usedFile) playTone(SOUND.click);
     }
 
     function playWrongSound() {
-      const usedFile = resetAndPlay("wrong", AUDIO.wrong);
+      const usedFile = resetAndPlay(AUDIO.wrong);
       if (!usedFile) playTone(SOUND.wrong);
     }
 
     function playSuccessSound() {
-      const usedFile = resetAndPlay("success", AUDIO.success);
+      const usedFile = resetAndPlay(AUDIO.success);
       if (!usedFile) {
         playTone(SOUND.successA);
         setTimeout(() => playTone(SOUND.successB), 90);
@@ -1063,7 +1038,7 @@
     }
 
     function playRevealStinger() {
-      const usedFile = resetAndPlay("revealStinger", AUDIO.revealStinger);
+      const usedFile = resetAndPlay(AUDIO.revealStinger);
       if (!usedFile) {
         playTone(SOUND.revealA);
         setTimeout(() => playTone(SOUND.revealB), 60);
@@ -1072,7 +1047,7 @@
     }
 
     function playClueRevealSound(index) {
-      const usedFile = resetAndPlay("clueReveal", AUDIO.clueReveal);
+      const usedFile = resetAndPlay(AUDIO.clueReveal);
       if (!usedFile) {
         playTone({
           wave: SOUND.clueRevealBase.wave,
@@ -1175,7 +1150,6 @@
       }
     }
 
-    markAudioAvailability();
     closeModalWindow();
     soundToggle.textContent = "Sound: Off";
     typeText(subtitleType, introText, 18);
