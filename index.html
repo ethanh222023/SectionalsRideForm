@@ -34,10 +34,11 @@
         linear-gradient(180deg, #020202 0%, #060606 55%, #010101 100%);
     }
 
+
     #landingScreen {
       position: fixed;
       inset: 0;
-      z-index: 20;
+      z-index: 30;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -45,7 +46,7 @@
       text-align: center;
       background:
         radial-gradient(circle at 50% 0%, rgba(120, 0, 0, 0.14), transparent 28%),
-        linear-gradient(180deg, rgba(0,0,0,0.94), rgba(0,0,0,0.98));
+        linear-gradient(180deg, rgba(0,0,0,0.94), rgba(0,0,0,0.985));
     }
 
     #enterSiteBtn {
@@ -566,13 +567,6 @@
       border-radius: 6px;
     }
 
-    .sound-list {
-      margin: 12px 0 0;
-      padding-left: 20px;
-      color: #c9bebe;
-      line-height: 1.8;
-    }
-
     .end-flash {
       position: fixed;
       inset: 0;
@@ -647,16 +641,6 @@
   <div class="ghost-text ghost-a">it is almost time</div>
   <div class="ghost-text ghost-b">find what was hidden</div>
   <div id="endFlash" class="end-flash"></div>
-
-  <!-- Replace these filenames with your own sound files in the sounds/ folder -->
-  <audio id="audio-countdown-ambient" src="sounds/countdown-ambient.mp3" loop preload="auto"></audio>
-  <audio id="audio-reveal-ambient" src="sounds/reveal-ambient.mp3" loop preload="auto"></audio>
-  <audio id="audio-tick" src="sounds/tick.mp3" preload="auto"></audio>
-  <audio id="audio-click" src="sounds/click.mp3" preload="auto"></audio>
-  <audio id="audio-wrong" src="sounds/wrong.mp3" preload="auto"></audio>
-  <audio id="audio-success" src="sounds/success.mp3" preload="auto"></audio>
-  <audio id="audio-reveal-stinger" src="sounds/reveal-stinger.mp3" preload="auto"></audio>
-  <audio id="audio-clue-reveal" src="sounds/clue-reveal.mp3" preload="auto"></audio>
 
   <div class="wrap">
     <div class="panel">
@@ -756,22 +740,12 @@
         </div>
 
         <div class="sound-config">
-          <h3>Sound file setup</h3>
-          <p>This version uses actual audio files instead of tone frequencies. Replace the placeholder filenames in the eight <code>&lt;audio&gt;</code> tags near the top of the <code>&lt;body&gt;</code>, or keep the names and drop your files into a <code>sounds</code> folder.</p>
-          <ul class="sound-list">
-            <li><code>sounds/countdown-ambient.mp3</code></li>
-            <li><code>sounds/reveal-ambient.mp3</code></li>
-            <li><code>sounds/tick.mp3</code></li>
-            <li><code>sounds/click.mp3</code></li>
-            <li><code>sounds/wrong.mp3</code></li>
-            <li><code>sounds/success.mp3</code></li>
-            <li><code>sounds/reveal-stinger.mp3</code></li>
-            <li><code>sounds/clue-reveal.mp3</code></li>
-          </ul>
+          <h3>Sound configuration</h3>
+          <p>Edit the values inside the <code>SOUND</code> object near the top of the script to change every sound yourself. You can swap tone shapes, pitches, durations, volumes, and slide targets for countdown ambience, post-reveal ambience, countdown ticks, clicks, success, failure, reveal stinger, and clue reveals.</p>
         </div>
 
         <p class="hint-note">
-          Test code for now: <strong>cheeniscrackerkangaroopenguinbadbreath</strong><br>
+          Test code for now: <strong>ringhollowarticleesreverwhisper</strong><br>
           Replace that with your real answer later, and swap the redirect link in the script with your Google Form.
         </p>
       </section>
@@ -783,6 +757,20 @@
 
     const introText = "The page will reveal itself when the countdown reaches zero. For now, all you get is the waiting.";
     const instructionsText = "Click each clue card to read the full details. Gather every fragment, place them in clue order, and enter them as one continuous code with no spaces in between. When the code is correct, the site can send players to your Google Form or the next stage of the game.";
+
+    const SOUND = {
+      ambientCountdown: { wave: "sine", baseFreq: 46, lfoFreq: 0.18, lfoDepth: 0.0035, gain: 0.018 },
+      ambientReveal: { wave: "triangle", baseFreq: 92, lfoFreq: 0.11, lfoDepth: 0.0025, gain: 0.012 },
+      tick: { wave: "triangle", frequency: 150, duration: 0.08, volume: 0.012, slideTo: 120 },
+      click: { wave: "square", frequency: 300, duration: 0.09, volume: 0.015, slideTo: 210 },
+      wrong: { wave: "square", frequency: 170, duration: 0.12, volume: 0.02, slideTo: 120 },
+      successA: { wave: "triangle", frequency: 340, duration: 0.12, volume: 0.018, slideTo: 420 },
+      successB: { wave: "triangle", frequency: 420, duration: 0.15, volume: 0.018, slideTo: 520 },
+      revealA: { wave: "sawtooth", frequency: 190, duration: 0.25, volume: 0.018, slideTo: 120 },
+      revealB: { wave: "sine", frequency: 90, duration: 0.6, volume: 0.04, slideTo: 50 },
+      revealC: { wave: "triangle", frequency: 420, duration: 0.14, volume: 0.012, slideTo: 620 },
+      clueRevealBase: { wave: "triangle", duration: 0.09, volume: 0.01 }
+    };
 
     const countdownScreen = document.getElementById("countdownScreen");
     const gameScreen = document.getElementById("gameScreen");
@@ -808,21 +796,20 @@
     const modalTitle = document.getElementById("modalTitle");
     const modalText = document.getElementById("modalText");
 
-    const AUDIO = {
-      countdownAmbient: document.getElementById("audio-countdown-ambient"),
-      revealAmbient: document.getElementById("audio-reveal-ambient"),
-      tick: document.getElementById("audio-tick"),
-      click: document.getElementById("audio-click"),
-      wrong: document.getElementById("audio-wrong"),
-      success: document.getElementById("audio-success"),
-      revealStinger: document.getElementById("audio-reveal-stinger"),
-      clueReveal: document.getElementById("audio-clue-reveal")
-    };
-
     const correctCode = "cheeniscrackerkangaroopenguinbadbreath";
     const redirectUrl = "https://forms.gle/example";
 
     let audioEnabled = false;
+    let audioCtx = null;
+    let audioArmed = false;
+    let ambientCountdownOsc = null;
+    let ambientCountdownGain = null;
+    let ambientCountdownLfo = null;
+    let ambientCountdownLfoGain = null;
+    let ambientRevealOsc = null;
+    let ambientRevealGain = null;
+    let ambientRevealLfo = null;
+    let ambientRevealLfoGain = null;
 
     function typeText(element, text, speed = 26, callback) {
       element.textContent = "";
@@ -839,72 +826,119 @@
       typeNext();
     }
 
-    function resetAndPlay(audioEl) {
-      if (!audioEnabled || !audioEl) return;
-      try {
-        audioEl.pause();
-        audioEl.currentTime = 0;
-        audioEl.play().catch(() => {});
-      } catch (error) {}
-    }
-
-    function playLoop(audioEl) {
-      if (!audioEnabled || !audioEl) return;
-      try {
-        audioEl.loop = true;
-        audioEl.play().catch(() => {});
-      } catch (error) {}
-    }
-
-    function stopAudio(audioEl) {
-      if (!audioEl) return;
-      try {
-        audioEl.pause();
-        audioEl.currentTime = 0;
-      } catch (error) {}
-    }
-
-    function stopAllSounds() {
-      Object.values(AUDIO).forEach(stopAudio);
-    }
-
-    function updateAmbientSounds() {
-      stopAudio(AUDIO.countdownAmbient);
-      stopAudio(AUDIO.revealAmbient);
-
-      if (!audioEnabled) return;
-
-      if (!countdownScreen.classList.contains("hidden")) {
-        playLoop(AUDIO.countdownAmbient);
-      }
-
-      if (!gameScreen.classList.contains("hidden")) {
-        playLoop(AUDIO.revealAmbient);
-      }
-    }
-
-      updateAmbientSounds();
-      resetAndPlay(AUDIO.click);
-    }
-
-    function playTickSound() { resetAndPlay(AUDIO.tick); }
-    function playClickSound() { resetAndPlay(AUDIO.click); }
-    function playWrongSound() { resetAndPlay(AUDIO.wrong); }
-    function playSuccessSound() { resetAndPlay(AUDIO.success); }
-    function playRevealStinger() { resetAndPlay(AUDIO.revealStinger); }
-    function playClueRevealSound() { resetAndPlay(AUDIO.clueReveal); }
-
     function openModal(title, detail) {
       modalTitle.textContent = title;
       modalText.textContent = detail;
       clueModal.classList.remove("hidden");
       clueModal.setAttribute("aria-hidden", "false");
-      playClickSound();
+      playClickTone();
     }
 
     function closeModalWindow() {
       clueModal.classList.add("hidden");
       clueModal.setAttribute("aria-hidden", "true");
+    }
+
+    function initAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      ambientCountdownOsc = audioCtx.createOscillator();
+      ambientCountdownOsc.type = SOUND.ambientCountdown.wave;
+      ambientCountdownOsc.frequency.value = SOUND.ambientCountdown.baseFreq;
+      ambientCountdownGain = audioCtx.createGain();
+      ambientCountdownGain.gain.value = 0.00001;
+      ambientCountdownLfo = audioCtx.createOscillator();
+      ambientCountdownLfo.type = "sine";
+      ambientCountdownLfo.frequency.value = SOUND.ambientCountdown.lfoFreq;
+      ambientCountdownLfoGain = audioCtx.createGain();
+      ambientCountdownLfoGain.gain.value = SOUND.ambientCountdown.lfoDepth;
+      ambientCountdownLfo.connect(ambientCountdownLfoGain);
+      ambientCountdownLfoGain.connect(ambientCountdownGain.gain);
+      ambientCountdownOsc.connect(ambientCountdownGain);
+      ambientCountdownGain.connect(audioCtx.destination);
+
+      ambientRevealOsc = audioCtx.createOscillator();
+      ambientRevealOsc.type = SOUND.ambientReveal.wave;
+      ambientRevealOsc.frequency.value = SOUND.ambientReveal.baseFreq;
+      ambientRevealGain = audioCtx.createGain();
+      ambientRevealGain.gain.value = 0.00001;
+      ambientRevealLfo = audioCtx.createOscillator();
+      ambientRevealLfo.type = "sine";
+      ambientRevealLfo.frequency.value = SOUND.ambientReveal.lfoFreq;
+      ambientRevealLfoGain = audioCtx.createGain();
+      ambientRevealLfoGain.gain.value = SOUND.ambientReveal.lfoDepth;
+      ambientRevealLfo.connect(ambientRevealLfoGain);
+      ambientRevealLfoGain.connect(ambientRevealGain.gain);
+      ambientRevealOsc.connect(ambientRevealGain);
+      ambientRevealGain.connect(audioCtx.destination);
+
+      ambientCountdownOsc.start();
+      ambientCountdownLfo.start();
+      ambientRevealOsc.start();
+      ambientRevealLfo.start();
+    }
+
+    async function ensureAudioStarted() {
+      initAudio();
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+      audioArmed = true;
+    }
+
+    function setCountdownAmbience(active) {
+      if (!audioCtx) return;
+      ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      if (active && audioEnabled) {
+        ambientCountdownGain.gain.linearRampToValueAtTime(SOUND.ambientCountdown.gain, audioCtx.currentTime + 0.5);
+      } else {
+        ambientCountdownGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
+      }
+    }
+
+    function setRevealAmbience(active) {
+      if (!audioCtx) return;
+      ambientRevealGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      if (active && audioEnabled) {
+        ambientRevealGain.gain.linearRampToValueAtTime(SOUND.ambientReveal.gain, audioCtx.currentTime + 0.8);
+      } else {
+        ambientRevealGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
+      }
+    }
+    }
+
+    function playTone(config) {
+      if (!audioEnabled || !audioCtx || !audioArmed) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = config.wave || "sine";
+      osc.frequency.setValueAtTime(config.frequency, audioCtx.currentTime);
+      if (config.slideTo !== undefined && config.slideTo !== null) {
+        osc.frequency.exponentialRampToValueAtTime(config.slideTo, audioCtx.currentTime + config.duration);
+      }
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(config.volume, audioCtx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + config.duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + config.duration + 0.04);
+    }
+
+    function playTickTone() { playTone(SOUND.tick); }
+    function playClickTone() { playTone(SOUND.click); }
+    function playWrongTone() { playTone(SOUND.wrong); }
+
+    function playSuccessTone() {
+      playTone(SOUND.successA);
+      setTimeout(() => playTone(SOUND.successB), 90);
+    }
+
+    function playRevealStinger() {
+      playTone(SOUND.revealA);
+      setTimeout(() => playTone(SOUND.revealB), 60);
+      setTimeout(() => playTone(SOUND.revealC), 160);
     }
 
     let previousSecond = null;
@@ -917,8 +951,6 @@
         minutesEl.textContent = 0;
         secondsEl.textContent = 0;
         statusLine.textContent = "It is open.";
-        stopAudio(AUDIO.tick);
-        stopAudio(AUDIO.tick);
         revealGame();
         return;
       }
@@ -936,7 +968,7 @@
 
       if (previousSecond !== seconds && seconds <= 4) {
         secondsBox.classList.add("danger");
-        playTickSound();
+        playTickTone();
       }
       previousSecond = seconds;
 
@@ -949,37 +981,23 @@
       }
     }
 
-    function revealGame() {
+    async function revealGame() {
       if (!gameScreen.classList.contains("hidden")) return;
       clearInterval(countdownInterval);
 
-      audioEnabled = true;
-      stopAudio(AUDIO.tick);
-      stopAudio(AUDIO.countdownAmbient);
-
-      try {
-        if (typeof unlockAudio === "function") {
-          Promise.resolve(unlockAudio()).then(() => {
-            updateAmbientSounds();
-            playRevealStinger();
-          }).catch(() => {
-            playRevealStinger();
-          });
-        } else {
-          updateAmbientSounds();
-          playRevealStinger();
-        }
-      } catch (error) {
-        playRevealStinger();
+      if (audioEnabled && !audioArmed) {
+        try { await ensureAudioStarted(); } catch (error) {}
       }
 
+      playRevealStinger();
       endFlash.classList.add("active");
       countdownScreen.classList.add("fade-out");
 
       setTimeout(() => {
         countdownScreen.classList.add("hidden");
         gameScreen.classList.remove("hidden");
-        updateAmbientSounds();
+        setCountdownAmbience(false);
+        setRevealAmbience(true);
         typeText(instructionsType, instructionsText, 18, revealClues);
       }, 900);
     }
@@ -988,7 +1006,13 @@
       clueCards.forEach((card, index) => {
         setTimeout(() => {
           card.classList.add("revealed");
-          playClueRevealSound();
+          playTone({
+            wave: SOUND.clueRevealBase.wave,
+            frequency: 220 + index * 18,
+            duration: SOUND.clueRevealBase.duration,
+            volume: SOUND.clueRevealBase.volume,
+            slideTo: 180 + index * 10
+          });
         }, index * 170);
       });
     }
@@ -1001,13 +1025,13 @@
       }
       if (userValue === correctCode) {
         resultMessage.textContent = "Correct. The next door is opening...";
-        playSuccessSound();
+        playSuccessTone();
         setTimeout(() => {
           window.location.href = redirectUrl;
         }, 900);
       } else {
         resultMessage.textContent = "That code is wrong. Try again.";
-        playWrongSound();
+        playWrongTone();
       }
     }
 
