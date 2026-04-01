@@ -595,6 +595,38 @@
       .time-box { min-width: 92px; }
       .game-screen { max-height: calc(100vh - 32px); }
     }
+    .sound-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .sound-upload-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #d8cfcf;
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .sound-upload-item input[type="file"] {
+      width: 100%;
+      color: #bfb4b4;
+      font-size: 0.84rem;
+    }
+
+    .sound-small-note {
+      margin-top: 14px;
+      color: #9f9797;
+      font-size: 0.86rem;
+    }
+
   </style>
 </head>
 <body>
@@ -708,10 +740,39 @@
           <div id="resultMessage" class="result"></div>
         </div>
 
+        
         <div class="sound-config">
           <h3>Sound configuration</h3>
-          <p>Edit the values inside the <code>SOUND</code> object near the top of the script to change every sound yourself. You can swap tone shapes, pitches, durations, volumes, and slide targets for countdown ambience, post-reveal ambience, countdown ticks, clicks, success, failure, reveal stinger, and clue reveals.</p>
+          <p>You can still edit the <code>SOUND</code> object for fallback tones and volume levels, but now you can also upload real audio files for each effect below. Uploaded files only live in the browser for that session, because the web enjoys being difficult.</p>
+          <div class="sound-upload-grid">
+            <label class="sound-upload-item">Countdown ambience
+              <input type="file" data-sound="ambientCountdown" accept="audio/*">
+            </label>
+            <label class="sound-upload-item">Post-reveal ambience
+              <input type="file" data-sound="ambientReveal" accept="audio/*">
+            </label>
+            <label class="sound-upload-item">Countdown tick
+              <input type="file" data-sound="tick" accept="audio/*">
+            </label>
+            <label class="sound-upload-item">Button / modal click
+              <input type="file" data-sound="click" accept="audio/*">
+            </label>
+            <label class="sound-upload-item">Wrong answer
+              <input type="file" data-sound="wrong" accept="audio/*">
+            </label>
+            <label class="sound-upload-item">Success
+              <input type="file" data-sound="success" accept="audio/*">
+            </label>
+            <label class="sound-upload-item">Reveal stinger
+              <input type="file" data-sound="revealStinger" accept="audio/*">
+            </label>
+            <label class="sound-upload-item">Clue reveal
+              <input type="file" data-sound="clueReveal" accept="audio/*">
+            </label>
+          </div>
+          <p class="sound-small-note">If a slot has no uploaded file, the page uses the fallback synthesized sound from <code>SOUND</code>.</p>
         </div>
+
 
         <p class="hint-note">
           Test code for now: <strong>ringhollowarticleesreverwhisper</strong><br>
@@ -721,6 +782,7 @@
     </div>
   </div>
 
+  
   <script>
     const launchTime = Date.now() + 5000;
 
@@ -728,17 +790,19 @@
     const instructionsText = "Click each clue card to read the full details. Gather every fragment, place them in clue order, and enter them as one continuous code with no spaces in between. When the code is correct, the site can send players to your Google Form or the next stage of the game.";
 
     const SOUND = {
-      ambientCountdown: { wave: "sine", baseFreq: 46, lfoFreq: 0.18, lfoDepth: 0.0035, gain: 0.018 },
-      ambientReveal: { wave: "triangle", baseFreq: 92, lfoFreq: 0.11, lfoDepth: 0.0025, gain: 0.012 },
-      tick: { wave: "triangle", frequency: 150, duration: 0.08, volume: 0.012, slideTo: 120 },
-      click: { wave: "square", frequency: 300, duration: 0.09, volume: 0.015, slideTo: 210 },
-      wrong: { wave: "square", frequency: 170, duration: 0.12, volume: 0.02, slideTo: 120 },
+      ambientCountdown: { wave: "sine", baseFreq: 46, lfoFreq: 0.18, lfoDepth: 0.0035, gain: 0.018, audioVolume: 0.30 },
+      ambientReveal: { wave: "triangle", baseFreq: 92, lfoFreq: 0.11, lfoDepth: 0.0025, gain: 0.012, audioVolume: 0.24 },
+      tick: { wave: "triangle", frequency: 150, duration: 0.08, volume: 0.012, slideTo: 120, audioVolume: 0.65 },
+      click: { wave: "square", frequency: 300, duration: 0.09, volume: 0.015, slideTo: 210, audioVolume: 0.65 },
+      wrong: { wave: "square", frequency: 170, duration: 0.12, volume: 0.02, slideTo: 120, audioVolume: 0.75 },
       successA: { wave: "triangle", frequency: 340, duration: 0.12, volume: 0.018, slideTo: 420 },
       successB: { wave: "triangle", frequency: 420, duration: 0.15, volume: 0.018, slideTo: 520 },
+      success: { audioVolume: 0.75 },
       revealA: { wave: "sawtooth", frequency: 190, duration: 0.25, volume: 0.018, slideTo: 120 },
       revealB: { wave: "sine", frequency: 90, duration: 0.6, volume: 0.04, slideTo: 50 },
       revealC: { wave: "triangle", frequency: 420, duration: 0.14, volume: 0.012, slideTo: 620 },
-      clueRevealBase: { wave: "triangle", duration: 0.09, volume: 0.01 }
+      revealStinger: { audioVolume: 0.8 },
+      clueRevealBase: { wave: "triangle", duration: 0.09, volume: 0.01, audioVolume: 0.55 }
     };
 
     const countdownScreen = document.getElementById("countdownScreen");
@@ -763,6 +827,7 @@
     const closeModal = document.getElementById("closeModal");
     const modalTitle = document.getElementById("modalTitle");
     const modalText = document.getElementById("modalText");
+    const soundInputs = Array.from(document.querySelectorAll("[data-sound]"));
 
     const correctCode = "cheeniscrackerkangaroopenguinbadbreath";
     const redirectUrl = "https://forms.gle/example";
@@ -778,6 +843,9 @@
     let ambientRevealGain = null;
     let ambientRevealLfo = null;
     let ambientRevealLfoGain = null;
+
+    const uploadedSoundUrls = {};
+    const uploadedSoundMeta = {};
 
     function typeText(element, text, speed = 26, callback) {
       element.textContent = "";
@@ -855,8 +923,52 @@
       audioArmed = true;
     }
 
+    function hasUploadedSound(key) {
+      return Boolean(uploadedSoundUrls[key]);
+    }
+
+    function stopUploadedLoop(key) {
+      const meta = uploadedSoundMeta[key];
+      if (!meta || !meta.loopEl) return;
+      meta.loopEl.pause();
+      meta.loopEl.currentTime = 0;
+      meta.loopEl = null;
+    }
+
+    function startUploadedLoop(key, volume = 0.3) {
+      if (!audioEnabled || !audioArmed || !hasUploadedSound(key)) return;
+      const meta = uploadedSoundMeta[key] || {};
+      stopUploadedLoop(key);
+      const audio = new Audio(uploadedSoundUrls[key]);
+      audio.loop = true;
+      audio.volume = volume;
+      audio.play().catch(() => {});
+      meta.loopEl = audio;
+      uploadedSoundMeta[key] = meta;
+    }
+
+    function playUploadedOneShot(key, volume = 0.7) {
+      if (!audioEnabled || !audioArmed || !hasUploadedSound(key)) return false;
+      const audio = new Audio(uploadedSoundUrls[key]);
+      audio.volume = volume;
+      audio.play().catch(() => {});
+      return true;
+    }
+
     function setCountdownAmbience(active) {
       if (!audioCtx) return;
+      if (hasUploadedSound("ambientCountdown")) {
+        ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        ambientCountdownGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+        if (active) {
+          startUploadedLoop("ambientCountdown", SOUND.ambientCountdown.audioVolume ?? 0.3);
+        } else {
+          stopUploadedLoop("ambientCountdown");
+        }
+        return;
+      }
+
+      stopUploadedLoop("ambientCountdown");
       ambientCountdownGain.gain.cancelScheduledValues(audioCtx.currentTime);
       if (active && audioEnabled) {
         ambientCountdownGain.gain.linearRampToValueAtTime(SOUND.ambientCountdown.gain, audioCtx.currentTime + 0.5);
@@ -867,6 +979,18 @@
 
     function setRevealAmbience(active) {
       if (!audioCtx) return;
+      if (hasUploadedSound("ambientReveal")) {
+        ambientRevealGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        ambientRevealGain.gain.linearRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+        if (active) {
+          startUploadedLoop("ambientReveal", SOUND.ambientReveal.audioVolume ?? 0.24);
+        } else {
+          stopUploadedLoop("ambientReveal");
+        }
+        return;
+      }
+
+      stopUploadedLoop("ambientReveal");
       ambientRevealGain.gain.cancelScheduledValues(audioCtx.currentTime);
       if (active && audioEnabled) {
         ambientRevealGain.gain.linearRampToValueAtTime(SOUND.ambientReveal.gain, audioCtx.currentTime + 0.8);
@@ -876,13 +1000,18 @@
     }
 
     async function toggleSound() {
-      await ensureAudioStarted();
+      if (!audioArmed) {
+        await ensureAudioStarted();
+      }
       audioEnabled = !audioEnabled;
       soundToggle.textContent = `Sound: ${audioEnabled ? "On" : "Off"}`;
       setCountdownAmbience(!countdownScreen.classList.contains("hidden"));
       setRevealAmbience(!gameScreen.classList.contains("hidden"));
       if (audioEnabled) {
         playClickTone();
+      } else {
+        stopUploadedLoop("ambientCountdown");
+        stopUploadedLoop("ambientReveal");
       }
     }
 
@@ -904,19 +1033,79 @@
       osc.stop(audioCtx.currentTime + config.duration + 0.04);
     }
 
-    function playTickTone() { playTone(SOUND.tick); }
-    function playClickTone() { playTone(SOUND.click); }
-    function playWrongTone() { playTone(SOUND.wrong); }
+    function playTickTone() {
+      if (!playUploadedOneShot("tick", SOUND.tick.audioVolume ?? 0.65)) {
+        playTone(SOUND.tick);
+      }
+    }
+
+    function playClickTone() {
+      if (!playUploadedOneShot("click", SOUND.click.audioVolume ?? 0.65)) {
+        playTone(SOUND.click);
+      }
+    }
+
+    function playWrongTone() {
+      if (!playUploadedOneShot("wrong", SOUND.wrong.audioVolume ?? 0.75)) {
+        playTone(SOUND.wrong);
+      }
+    }
 
     function playSuccessTone() {
-      playTone(SOUND.successA);
-      setTimeout(() => playTone(SOUND.successB), 90);
+      if (!playUploadedOneShot("success", SOUND.success.audioVolume ?? 0.75)) {
+        playTone(SOUND.successA);
+        setTimeout(() => playTone(SOUND.successB), 90);
+      }
     }
 
     function playRevealStinger() {
-      playTone(SOUND.revealA);
-      setTimeout(() => playTone(SOUND.revealB), 60);
-      setTimeout(() => playTone(SOUND.revealC), 160);
+      if (!playUploadedOneShot("revealStinger", SOUND.revealStinger.audioVolume ?? 0.8)) {
+        playTone(SOUND.revealA);
+        setTimeout(() => playTone(SOUND.revealB), 60);
+        setTimeout(() => playTone(SOUND.revealC), 160);
+      }
+    }
+
+    function playClueRevealTone(index) {
+      if (!playUploadedOneShot("clueReveal", SOUND.clueRevealBase.audioVolume ?? 0.55)) {
+        playTone({
+          wave: SOUND.clueRevealBase.wave,
+          frequency: 220 + index * 18,
+          duration: SOUND.clueRevealBase.duration,
+          volume: SOUND.clueRevealBase.volume,
+          slideTo: 180 + index * 10
+        });
+      }
+    }
+
+    function handleUploadedSound(event) {
+      const input = event.target;
+      const key = input.dataset.sound;
+      const file = input.files && input.files[0];
+
+      if (!key) return;
+
+      if (uploadedSoundUrls[key]) {
+        URL.revokeObjectURL(uploadedSoundUrls[key]);
+        delete uploadedSoundUrls[key];
+      }
+
+      stopUploadedLoop(key);
+
+      if (!file) {
+        return;
+      }
+
+      uploadedSoundUrls[key] = URL.createObjectURL(file);
+
+      if (audioEnabled) {
+        if (key === "ambientCountdown" && !countdownScreen.classList.contains("hidden")) {
+          setCountdownAmbience(true);
+        }
+        if (key === "ambientReveal" && !gameScreen.classList.contains("hidden")) {
+          setRevealAmbience(true);
+        }
+      }
     }
 
     let previousSecond = null;
@@ -984,13 +1173,7 @@
       clueCards.forEach((card, index) => {
         setTimeout(() => {
           card.classList.add("revealed");
-          playTone({
-            wave: SOUND.clueRevealBase.wave,
-            frequency: 220 + index * 18,
-            duration: SOUND.clueRevealBase.duration,
-            volume: SOUND.clueRevealBase.volume,
-            slideTo: 180 + index * 10
-          });
+          playClueRevealTone(index);
         }, index * 170);
       });
     }
@@ -1029,6 +1212,9 @@
         }
       });
     });
+    soundInputs.forEach((input) => {
+      input.addEventListener("change", handleUploadedSound);
+    });
     closeModal.addEventListener("click", closeModalWindow);
     clueModal.addEventListener("click", (event) => {
       if (event.target === clueModal) closeModalWindow();
@@ -1043,5 +1229,6 @@
     });
     submitCodeBtn.addEventListener("click", checkCode);
   </script>
+
 </body>
 </html>
