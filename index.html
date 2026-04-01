@@ -952,16 +952,35 @@
       }
     }
 
+    
     function enterSite() {
       audioEnabled = true;
       launchTime = Date.now() + 5000;
       landingScreen.classList.add("hidden");
+
+      // FORCE unlock audio by playing + pausing all once
+      Object.values(AUDIO).forEach(a => {
+        try {
+          a.muted = false;
+          a.play().then(() => {
+            a.pause();
+            a.currentTime = 0;
+          }).catch(() => {});
+        } catch(e){}
+      });
+
       typeText(subtitleType, introText, 18);
-      updateAmbientSounds();
+
+      // Start ambient AFTER unlock
+      setTimeout(() => {
+        updateAmbientSounds();
+      }, 50);
+
       playClickSound();
       updateCountdown();
       countdownInterval = setInterval(updateCountdown, 250);
     }
+
 
     closeModalWindow();
 
