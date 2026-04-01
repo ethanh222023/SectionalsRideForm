@@ -165,6 +165,51 @@
     .hidden { display: none !important; }
     .fade-out { opacity: 0; transform: scale(0.985); }
 
+    .landing-screen {
+      position: relative;
+      z-index: 1;
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .landing-inner {
+      width: min(720px, 100%);
+      padding: 28px 10px;
+    }
+
+    .landing-title {
+      margin: 0 0 18px;
+      font-size: clamp(3rem, 9vw, 6.8rem);
+      line-height: 0.9;
+      text-shadow: 0 0 12px rgba(143,16,16,0.22), 0 0 30px rgba(143,16,16,0.10);
+      animation: lowFlicker 7s infinite;
+    }
+
+    .landing-copy {
+      margin: 0 auto 28px;
+      max-width: 620px;
+      color: #c1b8b8;
+      line-height: 1.75;
+    }
+
+    .landing-note {
+      margin-top: 14px;
+      color: rgba(255,255,255,0.22);
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .enter-button {
+      min-width: 230px;
+      padding: 16px 24px;
+      font-size: 1.02rem;
+    }
+
     .eyebrow {
       margin-bottom: 18px;
       color: var(--muted);
@@ -280,36 +325,6 @@
       color: #e3d5d5;
       letter-spacing: 0.14em;
       text-shadow: 0 0 10px rgba(143,16,16,0.14);
-    }
-
-
-    #landingScreen {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(120, 0, 0, 0.14), transparent 28%),
-        linear-gradient(180deg, rgba(0,0,0,0.94), rgba(0,0,0,0.985));
-    }
-
-    #enterSiteBtn {
-      min-width: auto;
-      padding: 18px 28px;
-      font-size: 1.15rem;
-      letter-spacing: 0.08em;
-    }
-
-    .landing-note {
-      margin-top: 14px;
-      color: rgba(255,255,255,0.42);
-      font-size: 0.85rem;
-      letter-spacing: 0.06em;
-      text-transform: lowercase;
     }
 
     .game-screen {
@@ -545,6 +560,13 @@
       border-radius: 6px;
     }
 
+    .sound-list {
+      margin: 12px 0 0;
+      padding-left: 20px;
+      color: #c9bebe;
+      line-height: 1.8;
+    }
+
     .end-flash {
       position: fixed;
       inset: 0;
@@ -606,12 +628,6 @@
   </style>
 </head>
 <body>
-
-  <div id="landingScreen">
-    <button id="enterSiteBtn" type="button">Enter if you dare</button>
-    <div class="landing-note">best experienced with sound</div>
-  </div>
-
   <div class="fog"></div>
   <div class="fog-two"></div>
   <div class="red-haze"></div>
@@ -620,9 +636,30 @@
   <div class="ghost-text ghost-b">find what was hidden</div>
   <div id="endFlash" class="end-flash"></div>
 
+  <!-- Replace these filenames with your own sound files in the sounds/ folder -->
+  <audio id="audio-countdown-ambient" src="sounds/countdown-ambient.mp3" loop preload="auto"></audio>
+  <audio id="audio-reveal-ambient" src="sounds/reveal-ambient.mp3" loop preload="auto"></audio>
+  <audio id="audio-tick" src="sounds/tick.mp3" preload="auto"></audio>
+  <audio id="audio-click" src="sounds/click.mp3" preload="auto"></audio>
+  <audio id="audio-wrong" src="sounds/wrong.mp3" preload="auto"></audio>
+  <audio id="audio-success" src="sounds/success.mp3" preload="auto"></audio>
+  <audio id="audio-reveal-stinger" src="sounds/reveal-stinger.mp3" preload="auto"></audio>
+  <audio id="audio-clue-reveal" src="sounds/clue-reveal.mp3" preload="auto"></audio>
+
   <div class="wrap">
     <div class="panel">
-      <section id="countdownScreen" class="countdown-screen">
+      <section id="landingScreen" class="landing-screen">
+        <div class="landing-inner">
+          <div class="eyebrow">One last warning</div>
+          <div class="omen-line">some doors stay closed for a reason</div>
+          <h1 class="landing-title">The Hunt Awaits</h1>
+          <p class="landing-copy">This page was clearly built to make your friends mildly uncomfortable, which is at least an honest design goal. Click the button below to enter the countdown and wake the audio.</p>
+          <button id="enterSite" class="enter-button" type="button">Click here if you dare</button>
+          <div class="landing-note">Best experienced with sound</div>
+        </div>
+      </section>
+
+      <section id="countdownScreen" class="countdown-screen hidden">
         <div class="eyebrow">Access restricted</div>
         <div class="omen-line">something is waiting behind the glass</div>
         <h1 class="title">The Hunt Opens Soon</h1>
@@ -652,6 +689,7 @@
 
         <div id="statusLine" class="status-line">Do not look away.</div>
         <div class="under-line">when the numbers die, the page wakes up</div>
+
       </section>
 
       <section id="gameScreen" class="game-screen hidden">
@@ -718,28 +756,38 @@
         </div>
 
         <div class="sound-config">
-          <h3>Sound configuration</h3>
-          <p>Edit the values inside the <code>SOUND</code> object near the top of the script to change every sound yourself. You can swap tone shapes, pitches, durations, volumes, and slide targets for countdown ambience, post-reveal ambience, countdown ticks, clicks, success, failure, reveal stinger, and clue reveals.</p>
+          <h3>Sound file setup</h3>
+          <p>This version uses actual audio files instead of tone frequencies. Replace the placeholder filenames in the eight <code>&lt;audio&gt;</code> tags near the top of the <code>&lt;body&gt;</code>, or keep the names and drop your files into a <code>sounds</code> folder.</p>
+          <ul class="sound-list">
+            <li><code>sounds/countdown-ambient.mp3</code></li>
+            <li><code>sounds/reveal-ambient.mp3</code></li>
+            <li><code>sounds/tick.mp3</code></li>
+            <li><code>sounds/click.mp3</code></li>
+            <li><code>sounds/wrong.mp3</code></li>
+            <li><code>sounds/success.mp3</code></li>
+            <li><code>sounds/reveal-stinger.mp3</code></li>
+            <li><code>sounds/clue-reveal.mp3</code></li>
+          </ul>
         </div>
 
         <p class="hint-note">
-          Test code for now: <strong>ringhollowarticleesreverwhisper</strong><br>
+          Test code for now: <strong>cheeniscrackerkangaroopenguinbadbreath</strong><br>
           Replace that with your real answer later, and swap the redirect link in the script with your Google Form.
         </p>
       </section>
     </div>
   </div>
 
-  
   <script>
+    const countdownDurationMs = 5000;
     let launchTime = null;
+    let countdownInterval = null;
 
     const introText = "The page will reveal itself when the countdown reaches zero. For now, all you get is the waiting.";
     const instructionsText = "Click each clue card to read the full details. Gather every fragment, place them in clue order, and enter them as one continuous code with no spaces in between. When the code is correct, the site can send players to your Google Form or the next stage of the game.";
 
     const landingScreen = document.getElementById("landingScreen");
-    const enterSiteBtn = document.getElementById("enterSiteBtn");
-
+    const enterSiteBtn = document.getElementById("enterSite");
     const countdownScreen = document.getElementById("countdownScreen");
     const gameScreen = document.getElementById("gameScreen");
     const statusLine = document.getElementById("statusLine");
@@ -777,13 +825,11 @@
     const redirectUrl = "https://forms.gle/example";
 
     let audioEnabled = false;
-    let previousSecond = null;
-    let countdownInterval = null;
+    let siteStarted = false;
 
     function typeText(element, text, speed = 26, callback) {
       element.textContent = "";
       let i = 0;
-
       function typeNext() {
         if (i < text.length) {
           element.textContent += text.charAt(i);
@@ -793,7 +839,6 @@
           callback();
         }
       }
-
       typeNext();
     }
 
@@ -840,6 +885,28 @@
         playLoop(AUDIO.revealAmbient);
       }
     }
+    function enableAudio() {
+      audioEnabled = true;
+      updateAmbientSounds();
+    }
+
+    function startExperience() {
+      if (siteStarted) return;
+      siteStarted = true;
+      launchTime = Date.now() + countdownDurationMs;
+      previousSecond = null;
+
+      landingScreen.classList.add("fade-out");
+      setTimeout(() => {
+        landingScreen.classList.add("hidden");
+        countdownScreen.classList.remove("hidden");
+        typeText(subtitleType, introText, 18);
+        enableAudio();
+        resetAndPlay(AUDIO.click);
+        countdownInterval = setInterval(updateCountdown, 250);
+        updateCountdown();
+      }, 700);
+    }
 
     function playTickSound() { resetAndPlay(AUDIO.tick); }
     function playClickSound() { resetAndPlay(AUDIO.click); }
@@ -861,18 +928,19 @@
       clueModal.setAttribute("aria-hidden", "true");
     }
 
+    let previousSecond = null;
     function updateCountdown() {
-      if (launchTime === null) return;
+      if (!launchTime) return;
 
       const now = Date.now();
       const diff = launchTime - now;
-
       if (diff <= 0) {
         daysEl.textContent = 0;
         hoursEl.textContent = 0;
         minutesEl.textContent = 0;
         secondsEl.textContent = 0;
         statusLine.textContent = "It is open.";
+        stopAudio(AUDIO.tick);
         stopAudio(AUDIO.tick);
         revealGame();
         return;
@@ -889,7 +957,7 @@
       minutesEl.textContent = minutes;
       secondsEl.textContent = seconds;
 
-      if (previousSecond !== seconds && seconds <= 4 && seconds > 0) {
+      if (previousSecond !== seconds && seconds <= 4) {
         secondsBox.classList.add("danger");
         playTickSound();
       }
@@ -906,13 +974,17 @@
 
     function revealGame() {
       if (!gameScreen.classList.contains("hidden")) return;
-
-      clearInterval(countdownInterval);
-      stopAudio(AUDIO.tick);
-      stopAudio(AUDIO.countdownAmbient);
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
 
       audioEnabled = true;
+      stopAudio(AUDIO.tick);
+      stopAudio(AUDIO.countdownAmbient);
+      updateAmbientSounds();
       playRevealStinger();
+
       endFlash.classList.add("active");
       countdownScreen.classList.add("fade-out");
 
@@ -939,7 +1011,6 @@
         resultMessage.textContent = "You need to enter something first.";
         return;
       }
-
       if (userValue === correctCode) {
         resultMessage.textContent = "Correct. The next door is opening...";
         playSuccessSound();
@@ -952,40 +1023,9 @@
       }
     }
 
-    
-    function enterSite() {
-      audioEnabled = true;
-      launchTime = Date.now() + 5000;
-      landingScreen.classList.add("hidden");
-
-      // FORCE unlock audio by playing + pausing all once
-      Object.values(AUDIO).forEach(a => {
-        try {
-          a.muted = false;
-          a.play().then(() => {
-            a.pause();
-            a.currentTime = 0;
-          }).catch(() => {});
-        } catch(e){}
-      });
-
-      typeText(subtitleType, introText, 18);
-
-      // Start ambient AFTER unlock
-      setTimeout(() => {
-        updateAmbientSounds();
-      }, 50);
-
-      playClickSound();
-      updateCountdown();
-      countdownInterval = setInterval(updateCountdown, 250);
-    }
-
-
     closeModalWindow();
 
-    enterSiteBtn.addEventListener("click", enterSite);
-
+    enterSiteBtn.addEventListener("click", startExperience);
     clueCards.forEach((card) => {
       card.addEventListener("click", () => openModal(card.dataset.title, card.dataset.detail));
       card.addEventListener("keydown", (event) => {
@@ -995,13 +1035,10 @@
         }
       });
     });
-
     closeModal.addEventListener("click", closeModalWindow);
-
     clueModal.addEventListener("click", (event) => {
       if (event.target === clueModal) closeModalWindow();
     });
-
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !clueModal.classList.contains("hidden")) {
         closeModalWindow();
@@ -1010,9 +1047,7 @@
         checkCode();
       }
     });
-
     submitCodeBtn.addEventListener("click", checkCode);
   </script>
-
 </body>
 </html>
