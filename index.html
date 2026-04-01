@@ -778,8 +778,9 @@
   </div>
 
   <script>
-    const countdownDurationMs = 5000;
-    let launchTime = null;
+    const targetLaunchDate = new Date("2026-04-01T23:59:00");
+    // Change the date and time above to test. Example format: YYYY-MM-DDTHH:MM:SS
+    let launchTime = targetLaunchDate.getTime();
     let countdownInterval = null;
 
     const introText = "The page will reveal itself when the countdown reaches zero. For now, all you get is the waiting.";
@@ -892,16 +893,22 @@
     function startExperience() {
       if (siteStarted) return;
       siteStarted = true;
-      launchTime = Date.now() + countdownDurationMs;
+      launchTime = targetLaunchDate.getTime();
       previousSecond = null;
 
       landingScreen.classList.add("fade-out");
       setTimeout(() => {
         landingScreen.classList.add("hidden");
-        countdownScreen.classList.remove("hidden");
-        typeText(subtitleType, introText, 18);
         enableAudio();
         resetAndPlay(AUDIO.click);
+
+        if (Date.now() >= launchTime) {
+          revealGame();
+          return;
+        }
+
+        countdownScreen.classList.remove("hidden");
+        typeText(subtitleType, introText, 18);
         countdownInterval = setInterval(updateCountdown, 250);
         updateCountdown();
       }, 700);
@@ -962,9 +969,13 @@
       }
       previousSecond = seconds;
 
-      if (seconds >= 4) {
+      if (diff > 86400000) {
+        statusLine.textContent = "The hour has not arrived.";
+      } else if (diff > 3600000) {
+        statusLine.textContent = "It is getting closer.";
+      } else if (diff > 10000) {
         statusLine.textContent = "Do not look away.";
-      } else if (seconds >= 2) {
+      } else if (diff > 3000) {
         statusLine.textContent = "Something is waking up.";
       } else {
         statusLine.textContent = "It is almost here.";
